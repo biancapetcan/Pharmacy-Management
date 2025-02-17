@@ -61,6 +61,45 @@ CONSTRAINT PK_ID_Cumaprare PRIMARY KEY(ID_Cumparare),
 CONSTRAINT FK_ID_Medicament_Cumparari FOREIGN KEY(ID_Medicament) REFERENCES Medicamente(ID_Medicament)
 );
 
+CREATE TABLE Feedback (
+    ID_Feedback INT AUTO_INCREMENT PRIMARY KEY,
+    ID_User VARCHAR(60) NOT NULL,
+    ID_Medicament INT,
+    ID_Furnizor INT,
+    ID_Comanda INT,
+    Rating INT NOT NULL, 
+    Comentariu TEXT,
+    Data_Feedback DATE NOT NULL,
+    CONSTRAINT FK_User_Feedback FOREIGN KEY (ID_User) REFERENCES USERS(EMAIL),
+    CONSTRAINT FK_Medicament_Feedback FOREIGN KEY (ID_Medicament) REFERENCES Medicamente(ID_Medicament),
+    CONSTRAINT FK_Furnizor_Feedback FOREIGN KEY (ID_Furnizor) REFERENCES Furnizori(ID_Furnizor),
+    CONSTRAINT FK_Comanda_Feedback FOREIGN KEY (ID_Comanda) REFERENCES Comenzi(ID_Comanda)
+);
+
+CREATE TABLE Feedback_Furnizori (
+    ID_Feedback INT AUTO_INCREMENT NOT NULL,
+    ID_Furnizor INT NOT NULL,
+    ID_User VARCHAR(60) NOT NULL,
+    Rating INT NOT NULL,
+    Comentariu TEXT,
+    Data_Feedback DATE NOT NULL,
+    CONSTRAINT PK_Feedback_Furnizori PRIMARY KEY (ID_Feedback),
+    CONSTRAINT FK_Furnizor_Feedback FOREIGN KEY (ID_Furnizor) REFERENCES Furnizori(ID_Furnizor),
+    CONSTRAINT FK_User_Feedback_Furnizor FOREIGN KEY (ID_User) REFERENCES USERS(EMAIL)
+);
+
+CREATE TABLE Feedback_Medicamente (
+    ID_Feedback INT AUTO_INCREMENT NOT NULL,
+    ID_Medicament INT NOT NULL,
+    ID_User VARCHAR(60) NOT NULL,
+    Rating INT NOT NULL,
+    Comentariu TEXT,
+    Data_Feedback DATE NOT NULL,
+    CONSTRAINT PK_Feedback_Medicamente PRIMARY KEY (ID_Feedback),
+    CONSTRAINT FK_Medicament_Feedback FOREIGN KEY (ID_Medicament) REFERENCES Medicamente(ID_Medicament),
+    CONSTRAINT FK_User_Feedback_Medicament FOREIGN KEY (ID_User) REFERENCES USERS(EMAIL)
+);
+
 INSERT INTO Medicamente (ID_Medicament, Nume_Medicament, Tip_Medicament, Pret_Medicament) VALUES
 (1, 'Magneziu', 'Supliment', 13.00),
 (2, 'Ibuprofen', 'Analgezic', 15.50),
@@ -133,6 +172,16 @@ PAROLA VARCHAR(40) NOT NULL,
 ROL ENUM('Administrator Farmacie','Furnizor') NOT NULL DEFAULT 'Furnizor'
 );
 
+CREATE TABLE Promotii (
+    ID_Promotie INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Medicament INT NOT NULL,
+    Descriere TEXT,
+    Discount DECIMAL(5,2) NOT NULL, -- Procentul de reducere
+    Data_Start DATE NOT NULL,
+    FOREIGN KEY (ID_Medicament) REFERENCES Medicamente(ID_Medicament)
+);
+
+
 INSERT INTO USERS (NUME, PRENUME, EMAIL, PAROLA, ROL)
 VALUES 
 ('Popescu', 'Andrei', 'andreiandrei@yahoo.com', 'andrei1009', 'Administrator Farmacie'),
@@ -141,3 +190,21 @@ VALUES
 ('Dumitrescu', 'Elena', 'elena.dumitrescu@yahoo.com', 'elena2023', 'Administrator Farmacie'),
 ('Radu', 'Mihai', 'mihai.radu@gmail.com', 'raduandrei17', 'Furnizor'),
 ('Ionescu', 'Bogdan', 'bogdan_i@yahoo.com', 'bogdanionescu40', 'Administrator Farmacie');
+
+
+INSERT INTO Feedback (ID_User, ID_Medicament, Rating, Comentariu, Data_Feedback)
+VALUES 
+('andreiandrei@yahoo.com', 1, 4, 'Foarte eficient, dar este destul de costisitor.', '2025-01-10'),
+('elena.dumitrescu@yahoo.com', 4, 5, 'Vitamina C excelentă!', '2025-01-13'),
+('bogdan_i@yahoo.com', 6, 5, 'Rezultate rapide și foarte bune.', '2025-01-15');
+
+ INSERT INTO Feedback (ID_User, ID_Furnizor, Rating, Comentariu, Data_Feedback)
+VALUES 
+('andreiandrei@yahoo.com', 100, 5, 'Furnizor foarte prompt și de încredere.', '2025-01-15'),
+('elena.dumitrescu@yahoo.com', 103,  3, 'Produsele sunt bune, dar livrarea a fost întârziată.', '2025-01-17'),
+('bogdan_i@yahoo.com', 105, 4, 'Prețuri mari, dar calitatea serviciilor este bună.', '2025-01-20');
+
+INSERT INTO Promotii (ID_Medicament, Descriere, Discount, Data_Start, Data_End)
+VALUES 
+(1, 'Reducere pentru suplimentul de magneziu.', 15.00, '2025-01-10', '2025-01-20'),
+(2, 'Promoție analgezică pentru dureri acute.', 10.00, '2025-01-15', '2025-01-25');

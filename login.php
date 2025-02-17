@@ -21,6 +21,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $parola = trim($_POST['parola']);
     $rolSelectat = trim($_POST['rol']); // Rolul selectat din formular
 
+    // Verifică dacă toate câmpurile sunt completate
+    if (empty($email) || empty($parola) || empty($rolSelectat)) {
+        header("Location: errornume.php");
+        exit();
+    }
+
+    // Interogarea pentru verificarea utilizatorului
     $sql = "SELECT NUME, PRENUME, EMAIL, PAROLA, ROL FROM USERS WHERE EMAIL = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
@@ -31,37 +38,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $user = $result->fetch_assoc();
 
         // Verifică parola
-        if ($parola === $user['PAROLA']) {
-            // Verifică dacă rolul selectat se potrivește cu cel din baza de date
-            if ($rolSelectat === $user['ROL']) {
-                // Salvează datele utilizatorului în sesiune
-                $_SESSION['NUME'] = $user['NUME'];
-                $_SESSION['PRENUME'] = $user['PRENUME'];
-                $_SESSION['EMAIL'] = $user['EMAIL'];
-                $_SESSION['ROL'] = $user['ROL'];
-
-                // Redirecționează utilizatorul
-                if ($user['ROL'] === 'Administrator Farmacie') {
-                    header("Location: admin_dashboard.php");
-                } else if ($user['ROL'] === 'Furnizor') {
-                    header("Location: furnizor_dashboard.php");
-                }
-                exit();
-            } else {
-                // Redirecționează la o pagină de eroare dacă rolul nu se potrivește
-                header("Location: error.php");
-                exit();
-            }
-        } else {
-            echo "<p style='color:red;'>Parola este incorectă.</p>";
+        if ($parola !== $user['PAROLA']) {
+            header("Location: eroareparola.php");
+            exit();
         }
+
+        // Verifică dacă rolul selectat este corect
+        if ($rolSelectat !== $user['ROL']) {
+            header("Location: error.php");
+            exit();
+        }
+
+        // Dacă autentificarea este validă
+        $_SESSION['NUME'] = $user['NUME'];
+        $_SESSION['PRENUME'] = $user['PRENUME'];
+        $_SESSION['EMAIL'] = $user['EMAIL'];
+        $_SESSION['ROL'] = $user['ROL'];
+
+        // Redirecționează utilizatorul
+        if ($user['ROL'] === 'Administrator Farmacie') {
+            header("Location: admin_dashboard.php");
+        } else if ($user['ROL'] === 'Furnizor') {
+            header("Location: furnizor_dashboard.php");
+        }
+        exit();
     } else {
-        echo "<p style='color:red;'>Utilizatorul cu acest email nu există.</p>";
+        // Dacă email-ul nu există în baza de date
+        header("Location: eroareemail.php");
+        exit();
     }
 
     $stmt->close();
 }
 
 $conn->close();
-
 ?>
